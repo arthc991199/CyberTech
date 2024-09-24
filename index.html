@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberTech: Gra o Cyberbezpieczeństwie v2</title>
+    <title>CyberTech: Gra o Cyberbezpieczeństwie</title>
     <style>
         /* Ogólne style */
         body {
@@ -135,6 +135,9 @@
         </div>
         <p>Etap gry: <span id="postep">1</span> z 7</p>
 
+        <!-- Timer -->
+        <p><strong>Czas na decyzję:</strong> <span id="timer">30</span> sekund</p>
+
         <!-- Opcje wyboru -->
         <p id="etap-pytanie">Jak chcesz zareagować?</p>
         <button id="opcje-a" onclick="wybierzOpcje('A')">Opcja A</button>
@@ -164,6 +167,10 @@
         let postep = 1;
         let decyzje = [];
         let etap = 0;
+        let startTime, totalTime = 0;
+        const timeLimit = 30000; // Limit 30 sekund na decyzję
+        let timer; // Timer zmienna
+        let countdownTimer; // Zmienna odliczająca czas
 
         // Funkcja aktualizująca ikonę reputacji
         function aktualizujIkoneReputacji() {
@@ -236,82 +243,7 @@
                 najlepszaOpcja: 'B',
                 najlepszeWyjasnienie: 'Odzyskiwanie danych z kopii zapasowej pozwala przywrócić dostęp do danych bez ryzyka utraty reputacji związanej z płaceniem okupu.'
             },
-            {
-                naglowek: 'CyberTech: Problem z aktualizacjami oprogramowania',
-                tekst: 'Brak regularnych aktualizacji w systemach produkcyjnych ujawnił krytyczne luki bezpieczeństwa.',
-                lista: ['Nieaktualne oprogramowanie', 'Ryzyko cyberataków', 'Potencjalna utrata danych'],
-                consequenceInfo: 'Należy podjąć działania, aby zabezpieczyć systemy przed przyszłymi atakami.',
-                pytanie: 'Jak chcesz zareagować?',
-                odpowiedzi: {
-                    A: 'Natychmiastowa aktualizacja systemów.',
-                    B: 'Opracuj politykę regularnych aktualizacji.',
-                    C: 'Zatrudnij firmę zewnętrzną do nadzoru nad aktualizacjami.'
-                },
-                konsekwencje: {
-                    A: 'Straciłeś 10 punktów za przestój produkcji podczas aktualizacji.',
-                    B: 'To była najlepsza decyzja, nie tracisz punktów.',
-                    C: 'Straciłeś 15 punktów za wysokie koszty zatrudnienia firmy.'
-                },
-                najlepszaOpcja: 'B',
-                najlepszeWyjasnienie: 'Opracowanie polityki regularnych aktualizacji zapewni długoterminową stabilność i bezpieczeństwo, zmniejszając ryzyko przyszłych ataków.'
-            },
-            {
-                naglowek: 'CyberTech: Utrata danych',
-                tekst: 'Awaria serwera spowodowała utratę danych klientów, ponieważ nie wykonano kopii zapasowych.',
-                lista: ['Brak kopii zapasowych', 'Utrata danych klientów', 'Zatrzymanie działalności'],
-                consequenceInfo: 'Musisz zdecydować, jak odzyskać dane i zminimalizować szkody.',
-                pytanie: 'Jak chcesz zareagować?',
-                odpowiedzi: {
-                    A: 'Odzyskaj dane z chmury.',
-                    B: 'Przeprowadź audyt danych.',
-                    C: 'Zatrudnij firmę zewnętrzną do odzyskiwania danych.'
-                },
-                konsekwencje: {
-                    A: 'To była najlepsza decyzja, nie tracisz punktów.',
-                    B: 'Straciłeś 15 punktów za długi proces audytu.',
-                    C: 'Straciłeś 20 punktów za wysokie koszty odzyskiwania danych.'
-                },
-                najlepszaOpcja: 'A',
-                najlepszeWyjasnienie: 'Odzyskanie danych z chmury jest najszybszym i najefektywniejszym sposobem przywrócenia działalności.'
-            },
-            {
-                naglowek: 'CyberTech: Atak hakerski',
-                tekst: 'Hakerzy próbowali włamać się do sieci firmowej, wykorzystując niezałatane luki w systemie.',
-                lista: ['Ryzyko naruszenia danych', 'Potencjalna utrata zaufania klientów', 'Kompromitacja systemu produkcji'],
-                consequenceInfo: 'Firma musi szybko zareagować, aby zabezpieczyć swoje systemy.',
-                pytanie: 'Jak chcesz zareagować?',
-                odpowiedzi: {
-                    A: 'Zablokuj dostęp do sieci.',
-                    B: 'Przeprowadź wewnętrzne dochodzenie.',
-                    C: 'Zatrudnij firmę zewnętrzną do audytu bezpieczeństwa.'
-                },
-                konsekwencje: {
-                    A: 'To była najlepsza decyzja, nie tracisz punktów.',
-                    B: 'Straciłeś 10 punktów za opóźnienia w odkryciu przyczyn.',
-                    C: 'Straciłeś 15 punktów za wysokie koszty audytu.'
-                },
-                najlepszaOpcja: 'A',
-                najlepszeWyjasnienie: 'Zablokowanie dostępu natychmiast minimalizuje ryzyko i pozwala na szybkie działania naprawcze.'
-            },
-            {
-                naglowek: 'CyberTech: Reorganizacja po incydentach',
-                tekst: 'Firma musi podjąć kroki, aby uniknąć podobnych incydentów w przyszłości.',
-                lista: ['Ryzyko powtórzenia incydentów', 'Brak strategii zarządzania ryzykiem', 'Niewystarczające zasoby bezpieczeństwa'],
-                consequenceInfo: 'Decyzja wpłynie na długoterminowe bezpieczeństwo firmy.',
-                pytanie: 'Jak chcesz zareagować?',
-                odpowiedzi: {
-                    A: 'Stwórz dedykowany zespół ds. cyberbezpieczeństwa.',
-                    B: 'Wdróż kompleksową politykę bezpieczeństwa.',
-                    C: 'Zleć zarządzanie bezpieczeństwem firmie zewnętrznej.'
-                },
-                konsekwencje: {
-                    A: 'Straciłeś 20 punktów za koszty zatrudnienia zespołu.',
-                    B: 'To była najlepsza decyzja, nie tracisz punktów.',
-                    C: 'Straciłeś 15 punktów za koszty outsourcingu.'
-                },
-                najlepszaOpcja: 'B',
-                najlepszeWyjasnienie: 'Wdrożenie kompleksowej polityki bezpieczeństwa zapewnia spójne i efektywne zarządzanie ryzykiem w całej firmie.'
-            }
+            // Dodaj więcej pytań tutaj, jeśli potrzebne
         ];
 
         // Funkcja wyświetlająca etap gry
@@ -349,10 +281,52 @@
             // Aktualizacja postępu
             document.getElementById('postep').innerText = postep;
             document.getElementById('progress-fill').style.width = ((postep - 1) / pytania.length) * 100 + '%';
+
+            startTimer(); // Start timera
+        }
+
+        // Funkcja uruchomienia timera
+        function startTimer() {
+            clearTimeout(timer); // Zresetuj poprzedni timer
+            clearInterval(countdownTimer); // Zresetuj odliczanie
+            let timeLeft = timeLimit / 1000; // 30 sekund
+            document.getElementById('timer').innerText = timeLeft;
+
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    feedback.style.color = 'red';
+                    feedback.innerHTML = `Czas na odpowiedź minął! Przechodzimy do następnego etapu.`;
+                    document.getElementById('przejdz-dalej').classList.remove('hidden');
+                    document.getElementById('feedback').classList.remove('hidden');
+
+                    // Zablokowanie przycisków po upływie czasu
+                    document.getElementById('opcje-a').disabled = true;
+                    document.getElementById('opcje-b').disabled = true;
+                    document.getElementById('opcje-c').disabled = true;
+                }
+            }, 1000);
+
+            timer = setTimeout(function () {
+                clearInterval(countdownTimer); // Stop countdown
+                feedback.style.color = 'red';
+                feedback.innerHTML = `Czas na odpowiedź minął! Przechodzimy do następnego etapu.`;
+                document.getElementById('przejdz-dalej').classList.remove('hidden');
+                document.getElementById('feedback').classList.remove('hidden');
+
+                // Zablokowanie przycisków po upływie czasu
+                document.getElementById('opcje-a').disabled = true;
+                document.getElementById('opcje-b').disabled = true;
+                document.getElementById('opcje-c').disabled = true;
+            }, timeLimit);
         }
 
         // Funkcja wyboru opcji
         function wybierzOpcje(opcja) {
+            clearTimeout(timer); // Zatrzymaj timer
+            clearInterval(countdownTimer); // Zatrzymaj countdown
             const aktualnePytanie = pytania[etap];
             let komunikat = '';
 
