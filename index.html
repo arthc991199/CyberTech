@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberTech: Gra o Cyberbezpieczeństwie</title>
+    <style>
+        /* Ogólne style */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        #game-container, #summary {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        #summary {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #0275d8;
+        }
+        .scenario-description {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        ul {
+            text-align: left;
+            margin: 20px auto;
+            padding: 0;
+            list-style-type: none;
+        }
+        ul li {
+            padding: 10px;
+            background: #efefef;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #0275d8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #025aa5;
+        }
+        .btn-nav {
+            background-color: #FF9800; /* Inny kolor dla klawiszy nawigacyjnych */
+        }
+        .progress-bar {
+            height: 25px;
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: #0275d8;
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+        .reputation-counter {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            text-align: right;
+        }
+        .reputation-counter span {
+            margin-right: 5px;
+        }
+        .reputation-icon {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+        .feedback {
+            font-size: 1em;
+            font-weight: bold;
+            margin: 15px 0;
+            color: #333;
+        }
+        .hidden {
+            display: none;
+        }
+        /* Layout na desktop */
+        @media (min-width: 768px) {
+            #game-container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+        }
+        /* Layout na urządzenia mobilne */
+        @media (max-width: 768px) {
+            #game-container {
+                width: 100%;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ekran gry -->
+    <div id="game-container">
+        <div class="reputation-counter">
+            <span>Punkty reputacji:</span>
+            <span id="reputacja">100</span>
+            <span id="reputacja-ikona" class="reputation-icon">🛡️</span>
+        </div>
+        <h1 id="etap-naglowek">CyberTech: Atak hakerski</h1>
+        <p class="scenario-description" id="etap-tekst">Opis etapu gry...</p>
+        <div class="consequence-info" id="consequence-info">Informacja o okolicznościach...</div>
+        <ul id="lista-luk"></ul>
+
+        <!-- Wskaźnik postępu -->
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <p>Etap gry: <span id="postep">1</span> z 7</p>
+
+        <!-- Opcje wyboru -->
+        <p id="etap-pytanie">Jak chcesz zareagować?</p>
+        <button id="opcje-a" onclick="wybierzOpcje('A')">Opcja A</button>
+        <button id="opcje-b" onclick="wybierzOpcje('B')">Opcja B</button>
+        <button id="opcje-c" onclick="wybierzOpcje('C')">Opcja C</button>
+
+        <!-- Opis wybranej opcji -->
+        <div id="feedback" class="feedback hidden"></div>
+
+        <!-- Przycisk przejdź dalej -->
+        <button id="przejdz-dalej" class="btn-nav hidden" onclick="przejdzDalej()">Przejdź dalej</button>
+    </div>
+
+    <!-- Ekran wyników -->
+    <div id="summary">
+        <h1>Podsumowanie decyzji</h1>
+        <p id="podsumowanie-decyzji"></p>
+        <p>Ostateczne punkty reputacji: <span id="koncowa-reputacja"></span></p>
+        <h2>Rekomendacje</h2>
+        <ul id="rekomendacje"></ul>
+        <button onclick="restartujGre()" class="btn-nav">Zagraj ponownie</button>
+    </div>
+
+    <script>
+        // Zmienne globalne
+        let reputacja = 100;
+        let postep = 1;
+        let decyzje = [];
+        let etap = 0;
+
+        // Funkcja aktualizująca ikonę reputacji
+        function aktualizujIkoneReputacji() {
+            const ikona = document.getElementById('reputacja-ikona');
+            if (reputacja >= 70) {
+                ikona.style.color = 'green';
+            } else if (reputacja >= 40) {
+                ikona.style.color = 'orange';
+            } else {
+                ikona.style.color = 'red';
+            }
+        }
+
+        // Baza pytań (7 etapów)
+        const pytania = [
+            {
+                naglowek: 'CyberTech: Raport z Inspekcji',
+                tekst: 'Wykryto poważne luki w zabezpieczeniach firmy, które mogą prowadzić do cyberataków.',
+                lista: ['Słabe hasła', 'Brak szkoleń z phishingu', 'Niewystarczające kopie zapasowe'],
+                consequenceInfo: 'Brak działania może narazić firmę na poważne ataki i utratę danych.',
+                pytanie: 'Jak chcesz zareagować na te zagrożenia?',
+                odpowiedzi: {
+                    A: 'Zainwestuj w kompleksowy audyt bezpieczeństwa.',
+                    B: 'Przeprowadź szkolenia dla pracowników.',
+                    C: 'Szybko zaktualizuj systemy oprogramowania.'
+                },
+                konsekwencje: {
+                    A: 'Straciłeś 20 punktów reputacji za wysokie koszty audytu.',
+                    B: 'Straciłeś 10 punktów reputacji za powolne wdrożenie szkoleń.',
+                    C: 'Straciłeś 15 punktów reputacji za ignorowanie czynnika ludzkiego.'
+                },
+                najlepszaOpcja: 'A',
+                najlepszeWyjasnienie: 'Kompleksowy audyt bezpieczeństwa pozwala w pełni zidentyfikować wszystkie zagrożenia i planować działania naprawcze.'
+            },
+            {
+                naglowek: 'CyberTech: Incydent phishingowy',
+                tekst: 'Pracownik kliknął w podejrzany link, a firma została zainfekowana ransomwarem.',
+                lista: ['Infekcja ransomware', 'Brak kopii zapasowych', 'Zagrożenie dla produkcji'],
+                consequenceInfo: 'Szybka reakcja jest kluczowa, aby ograniczyć szkody i chronić dane.',
+                pytanie: 'Jak chcesz zareagować na ten incydent?',
+                odpowiedzi: {
+                    A: 'Zainwestuj w systemy ochrony phishingowej.',
+                    B: 'Izoluj zainfekowany system.',
+                    C: 'Rozpocznij plan reagowania na incydent.'
+                },
+                konsekwencje: {
+                    A: 'Straciłeś 10 punktów reputacji za brak natychmiastowych działań.',
+                    B: 'To była najlepsza decyzja, nie tracisz punktów.',
+                    C: 'Straciłeś 20 punktów reputacji za długie wdrażanie planu.'
+                },
+                najlepszaOpcja: 'B',
+                najlepszeWyjasnienie: 'Izolacja zainfekowanego systemu minimalizuje zagrożenie rozprzestrzeniania ransomware i pozwala szybko zapanować nad sytuacją.'
+            },
+            {
+                naglowek: 'CyberTech: Atak ransomware',
+                tekst: 'Złośliwe oprogramowanie zaszyfrowało dostęp do danych produkcyjnych, grożąc zatrzymaniem produkcji.',
+                lista: ['Dane zostały zaszyfrowane', 'Żądanie okupu', 'Zablokowana produkcja'],
+                consequenceInfo: 'Decyzja musi być szybka i skuteczna, aby odzyskać kontrolę nad danymi.',
+                pytanie: 'Jak chcesz zareagować?',
+                odpowiedzi: {
+                    A: 'Zapłać okup.',
+                    B: 'Przywróć dane z kopii zapasowej.',
+                    C: 'Zgłoś incydent do CSIRT.'
+                },
+                konsekwencje: {
+                    A: 'Straciłeś 30 punktów reputacji za brak gwarancji odzyskania danych.',
+                    B: 'To była najlepsza decyzja, nie tracisz punktów.',
+                    C: 'Straciłeś 20 punktów za ryzyko dochodzenia.'
+                },
+                najlepszaOpcja: 'B',
+                najlepszeWyjasnienie: 'Odzyskiwanie danych z kopii zapasowej pozwala przywrócić dostęp do danych bez ryzyka utraty reputacji związanej z płaceniem okupu.'
+            },
+            {
+                naglowek: 'CyberTech: Problem z aktualizacjami oprogramowania',
+                tekst: 'Brak regularnych aktualizacji w systemach produkcyjnych ujawnił krytyczne luki bezpieczeństwa.',
+                lista: ['Nieaktualne oprogramowanie', 'Ryzyko cyberataków', 'Potencjalna utrata danych'],
+                consequenceInfo: 'Należy podjąć działania, aby zabezpieczyć systemy przed przyszłymi atakami.',
+                pytanie: 'Jak chcesz zareagować?',
+                odpowiedzi: {
+                    A: 'Natychmiastowa aktualizacja systemów.',
+                    B: 'Opracuj politykę regularnych aktualizacji.',
+                    C: 'Zatrudnij firmę zewnętrzną do nadzoru nad aktualizacjami.'
+                },
+                konsekwencje: {
+                    A: 'Straciłeś 10 punktów za przestój produkcji podczas aktualizacji.',
+                    B: 'To była najlepsza decyzja, nie tracisz punktów.',
+                    C: 'Straciłeś 15 punktów za wysokie koszty zatrudnienia firmy.'
+                },
+                najlepszaOpcja: 'B',
+                najlepszeWyjasnienie: 'Opracowanie polityki regularnych aktualizacji zapewni długoterminową stabilność i bezpieczeństwo, zmniejszając ryzyko przyszłych ataków.'
+            },
+            {
+                naglowek: 'CyberTech: Utrata danych',
+                tekst: 'Awaria serwera spowodowała utratę danych klientów, ponieważ nie wykonano kopii zapasowych.',
+                lista: ['Brak kopii zapasowych', 'Utrata danych klientów', 'Zatrzymanie działalności'],
+                consequenceInfo: 'Musisz zdecydować, jak odzyskać dane i zminimalizować szkody.',
+                pytanie: 'Jak chcesz zareagować?',
+                odpowiedzi: {
+                    A: 'Odzyskaj dane z chmury.',
+                    B: 'Przeprowadź audyt danych.',
+                    C: 'Zatrudnij firmę zewnętrzną do odzyskiwania danych.'
+                },
+                konsekwencje: {
+                    A: 'To była najlepsza decyzja, nie tracisz punktów.',
+                    B: 'Straciłeś 15 punktów za długi proces audytu.',
+                    C: 'Straciłeś 20 punktów za wysokie koszty odzyskiwania danych.'
+                },
+                najlepszaOpcja: 'A',
+                najlepszeWyjasnienie: 'Odzyskanie danych z chmury jest najszybszym i najefektywniejszym sposobem przywrócenia działalności.'
+            },
+            {
+                naglowek: 'CyberTech: Atak hakerski',
+                tekst: 'Hakerzy próbowali włamać się do sieci firmowej, wykorzystując niezałatane luki w systemie.',
+                lista: ['Ryzyko naruszenia danych', 'Potencjalna utrata zaufania klientów', 'Kompromitacja systemu produkcji'],
+                consequenceInfo: 'Firma musi szybko zareagować, aby zabezpieczyć swoje systemy.',
+                pytanie: 'Jak chcesz zareagować?',
+                odpowiedzi: {
+                    A: 'Zablokuj dostęp do sieci.',
+                    B: 'Przeprowadź wewnętrzne dochodzenie.',
+                    C: 'Zatrudnij firmę zewnętrzną do audytu bezpieczeństwa.'
+                },
+                konsekwencje: {
+                    A: 'To była najlepsza decyzja, nie tracisz punktów.',
+                    B: 'Straciłeś 10 punktów za opóźnienia w odkryciu przyczyn.',
+                    C: 'Straciłeś 15 punktów za wysokie koszty audytu.'
+                },
+                najlepszaOpcja: 'A',
+                najlepszeWyjasnienie: 'Zablokowanie dostępu natychmiast minimalizuje ryzyko i pozwala na szybkie działania naprawcze.'
+            },
+            {
+                naglowek: 'CyberTech: Reorganizacja po incydentach',
+                tekst: 'Firma musi podjąć kroki, aby uniknąć podobnych incydentów w przyszłości.',
+                lista: ['Ryzyko powtórzenia incydentów', 'Brak strategii zarządzania ryzykiem', 'Niewystarczające zasoby bezpieczeństwa'],
+                consequenceInfo: 'Decyzja wpłynie na długoterminowe bezpieczeństwo firmy.',
+                pytanie: 'Jak chcesz zareagować?',
+                odpowiedzi: {
+                    A: 'Stwórz dedykowany zespół ds. cyberbezpieczeństwa.',
+                    B: 'Wdróż kompleksową politykę bezpieczeństwa.',
+                    C: 'Zleć zarządzanie bezpieczeństwem firmie zewnętrznej.'
+                },
+                konsekwencje: {
+                    A: 'Straciłeś 20 punktów za koszty zatrudnienia zespołu.',
+                    B: 'To była najlepsza decyzja, nie tracisz punktów.',
+                    C: 'Straciłeś 15 punktów za koszty outsourcingu.'
+                },
+                najlepszaOpcja: 'B',
+                najlepszeWyjasnienie: 'Wdrożenie kompleksowej polityki bezpieczeństwa zapewnia spójne i efektywne zarządzanie ryzykiem w całej firmie.'
+            }
+        ];
+
+        // Funkcja wyświetlająca etap gry
+        function pokazEtap() {
+            if (etap >= pytania.length) {
+                pokazWyniki();
+                return;
+            }
+
+            const aktualnePytanie = pytania[etap];
+            document.getElementById('etap-naglowek').innerText = aktualnePytanie.naglowek;
+            document.getElementById('etap-tekst').innerText = aktualnePytanie.tekst;
+            document.getElementById('consequence-info').innerText = aktualnePytanie.consequenceInfo;
+
+            // Zaktualizowanie listy luk
+            const listaLuk = document.getElementById('lista-luk');
+            listaLuk.innerHTML = '';
+            aktualnePytanie.lista.forEach(function(luka) {
+                const li = document.createElement('li');
+                li.innerText = luka;
+                listaLuk.appendChild(li);
+            });
+
+            document.getElementById('etap-pytanie').innerText = aktualnePytanie.pytanie;
+
+            // Zaktualizowanie tekstów przycisków
+            document.getElementById('opcje-a').innerText = aktualnePytanie.odpowiedzi.A;
+            document.getElementById('opcje-b').innerText = aktualnePytanie.odpowiedzi.B;
+            document.getElementById('opcje-c').innerText = aktualnePytanie.odpowiedzi.C;
+
+            // Ukryj przycisk przejścia dalej, dopóki nie zostanie wybrana opcja
+            document.getElementById('przejdz-dalej').classList.add('hidden');
+            document.getElementById('feedback').classList.add('hidden');
+
+            // Aktualizacja postępu
+            document.getElementById('postep').innerText = postep;
+            document.getElementById('progress-fill').style.width = ((postep - 1) / pytania.length) * 100 + '%';
+        }
+
+        // Funkcja wyboru opcji
+        function wybierzOpcje(opcja) {
+            const aktualnePytanie = pytania[etap];
+            let komunikat = '';
+
+            // Dodawanie informacji o decyzji
+            decyzje.push(opcja);
+
+            // Sprawdzenie, czy wybrano najlepszą decyzję
+            if (opcja !== aktualnePytanie.najlepszaOpcja) {
+                komunikat = aktualnePytanie.konsekwencje[opcja];
+                const utrataPunktow = parseInt(komunikat.match(/(\d+) punktów/)[1]);
+                reputacja -= utrataPunktow;
+                // Animacja utraty punktów
+                document.getElementById('reputacja').style.color = 'red';
+                setTimeout(() => {
+                    document.getElementById('reputacja').style.color = '#333';
+                }, 500);
+            } else {
+                komunikat = "To była najlepsza decyzja, nie tracisz punktów reputacji.";
+                // Animacja zachowania punktów
+                document.getElementById('reputacja').style.color = 'green';
+                setTimeout(() => {
+                    document.getElementById('reputacja').style.color = '#333';
+                }, 500);
+            }
+
+            document.getElementById('reputacja').innerText = reputacja;
+            aktualizujIkoneReputacji();
+
+            // Pokaż opis wyboru
+            const feedbackDiv = document.getElementById('feedback');
+            feedbackDiv.innerHTML = `<p>${komunikat}</p>`;
+
+            feedbackDiv.classList.remove('hidden');
+
+            // Pokaż przycisk przejścia dalej
+            document.getElementById('przejdz-dalej').classList.remove('hidden');
+
+            // Zablokuj przyciski opcji, aby uniemożliwić wielokrotny wybór
+            document.getElementById('opcje-a').disabled = true;
+            document.getElementById('opcje-b').disabled = true;
+            document.getElementById('opcje-c').disabled = true;
+        }
+
+        // Funkcja przejścia do następnego etapu
+        function przejdzDalej() {
+            // Odblokuj przyciski opcji
+            document.getElementById('opcje-a').disabled = false;
+            document.getElementById('opcje-b').disabled = false;
+            document.getElementById('opcje-c').disabled = false;
+
+            etap++;
+            postep++;
+            pokazEtap();
+        }
+
+        // Funkcja wyświetlająca ekran wyników
+        function pokazWyniki() {
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('summary').style.display = 'block';
+            document.getElementById('koncowa-reputacja').innerText = reputacja;
+
+            // Podsumowanie decyzji
+            let podsumowanie = '';
+            pytania.forEach((pytanie, index) => {
+                const decyzja = decyzje[index];
+                const najlepszaOpcja = pytanie.najlepszaOpcja;
+                if (decyzja === najlepszaOpcja) {
+                    podsumowanie += `<strong>Etap ${index + 1}:</strong> Dokonałeś najlepszego wyboru (${najlepszaOpcja}). ${pytanie.najlepszeWyjasnienie}<br><br>`;
+                } else {
+                    podsumowanie += `<strong>Etap ${index + 1}:</strong> Wybrałeś opcję ${decyzja}. Najlepszy wybór to ${najlepszaOpcja}. ${pytanie.najlepszeWyjasnienie}<br><br>`;
+                }
+            });
+            document.getElementById('podsumowanie-decyzji').innerHTML = podsumowanie;
+
+            // Rekomendacje w zależności od decyzji
+            let rekomendacje = [];
+            if (reputacja < 70) {
+                rekomendacje.push('Zwróć uwagę na proaktywne działania zapobiegające zagrożeniom.');
+            }
+            if (decyzje.includes('C')) {
+                rekomendacje.push('Rozważ lepsze planowanie i szybszą reakcję na incydenty.');
+            }
+
+            // Wyświetlanie rekomendacji
+            const ul = document.getElementById('rekomendacje');
+            ul.innerHTML = '';
+            rekomendacje.forEach(function(rek) {
+                const li = document.createElement('li');
+                li.innerText = rek;
+                ul.appendChild(li);
+            });
+        }
+
+        // Restart gry
+        function restartujGre() {
+            reputacja = 100;
+            postep = 1;
+            decyzje = [];
+            etap = 0;
+            document.getElementById('reputacja').innerText = reputacja;
+            document.getElementById('reputacja').style.color = '#333';
+            aktualizujIkoneReputacji();
+            document.getElementById('summary').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            pokazEtap();
+        }
+
+        // Inicjalizacja gry
+        pokazEtap();
+    </script>
+</body>
+</html>
