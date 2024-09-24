@@ -243,7 +243,82 @@
                 najlepszaOpcja: 'B',
                 najlepszeWyjasnienie: 'Odzyskiwanie danych z kopii zapasowej pozwala przywrócić dostęp do danych bez ryzyka utraty reputacji związanej z płaceniem okupu.'
             },
-            // Dodaj więcej pytań tutaj, jeśli potrzebne
+            {
+                naglowek: 'CyberTech: Problem z aktualizacjami oprogramowania',
+                tekst: 'Brak regularnych aktualizacji w systemach produkcyjnych ujawnił krytyczne luki bezpieczeństwa.',
+                lista: ['Nieaktualne oprogramowanie', 'Ryzyko cyberataków', 'Potencjalna utrata danych'],
+                consequenceInfo: 'Należy podjąć działania, aby zabezpieczyć systemy przed przyszłymi atakami.',
+                pytanie: 'Jak chcesz zareagować?',
+                odpowiedzi: {
+                    A: 'Natychmiastowa aktualizacja systemów.',
+                    B: 'Opracuj politykę regularnych aktualizacji.',
+                    C: 'Zatrudnij firmę zewnętrzną do nadzoru nad aktualizacjami.'
+                },
+                konsekwencje: {
+                    A: 'Straciłeś 10 punktów za przestój produkcji podczas aktualizacji.',
+                    B: 'To była najlepsza decyzja, nie tracisz punktów.',
+                    C: 'Straciłeś 15 punktów za wysokie koszty zatrudnienia firmy.'
+                },
+                najlepszaOpcja: 'B',
+                najlepszeWyjasnienie: 'Opracowanie polityki regularnych aktualizacji zapewni długoterminową stabilność i bezpieczeństwo, zmniejszając ryzyko przyszłych ataków.'
+            },
+            {
+                naglowek: 'CyberTech: Utrata danych',
+                tekst: 'Awaria serwera spowodowała utratę danych klientów, ponieważ nie wykonano kopii zapasowych.',
+                lista: ['Brak kopii zapasowych', 'Utrata danych klientów', 'Zatrzymanie działalności'],
+                consequenceInfo: 'Musisz zdecydować, jak odzyskać dane i zminimalizować szkody.',
+                pytanie: 'Jak chcesz zareagować?',
+                odpowiedzi: {
+                    A: 'Odzyskaj dane z chmury.',
+                    B: 'Przeprowadź audyt danych.',
+                    C: 'Zatrudnij firmę zewnętrzną do odzyskiwania danych.'
+                },
+                konsekwencje: {
+                    A: 'To była najlepsza decyzja, nie tracisz punktów.',
+                    B: 'Straciłeś 15 punktów za długi proces audytu.',
+                    C: 'Straciłeś 20 punktów za wysokie koszty odzyskiwania danych.'
+                },
+                najlepszaOpcja: 'A',
+                najlepszeWyjasnienie: 'Odzyskanie danych z chmury jest najszybszym i najefektywniejszym sposobem przywrócenia działalności.'
+            },
+            {
+                naglowek: 'CyberTech: Atak hakerski',
+                tekst: 'Hakerzy próbowali włamać się do sieci firmowej, wykorzystując niezałatane luki w systemie.',
+                lista: ['Ryzyko naruszenia danych', 'Potencjalna utrata zaufania klientów', 'Kompromitacja systemu produkcji'],
+                consequenceInfo: 'Firma musi szybko zareagować, aby zabezpieczyć swoje systemy.',
+                pytanie: 'Jak chcesz zareagować?',
+                odpowiedzi: {
+                    A: 'Zablokuj dostęp do sieci.',
+                    B: 'Przeprowadź wewnętrzne dochodzenie.',
+                    C: 'Zatrudnij firmę zewnętrzną do audytu bezpieczeństwa.'
+                },
+                konsekwencje: {
+                    A: 'To była najlepsza decyzja, nie tracisz punktów.',
+                    B: 'Straciłeś 10 punktów za opóźnienia w odkryciu przyczyn.',
+                    C: 'Straciłeś 15 punktów za wysokie koszty audytu.'
+                },
+                najlepszaOpcja: 'A',
+                najlepszeWyjasnienie: 'Zablokowanie dostępu natychmiast minimalizuje ryzyko i pozwala na szybkie działania naprawcze.'
+            },
+            {
+                naglowek: 'CyberTech: Reorganizacja po incydentach',
+                tekst: 'Firma musi podjąć kroki, aby uniknąć podobnych incydentów w przyszłości.',
+                lista: ['Ryzyko powtórzenia incydentów', 'Brak strategii zarządzania ryzykiem', 'Niewystarczające zasoby bezpieczeństwa'],
+                consequenceInfo: 'Decyzja wpłynie na długoterminowe bezpieczeństwo firmy.',
+                pytanie: 'Jak chcesz zareagować?',
+                odpowiedzi: {
+                    A: 'Stwórz dedykowany zespół ds. cyberbezpieczeństwa.',
+                    B: 'Wdróż kompleksową politykę bezpieczeństwa.',
+                    C: 'Zleć zarządzanie bezpieczeństwem firmie zewnętrznej.'
+                },
+                konsekwencje: {
+                    A: 'Straciłeś 20 punktów za koszty zatrudnienia zespołu.',
+                    B: 'To była najlepsza decyzja, nie tracisz punktów.',
+                    C: 'Straciłeś 15 punktów za koszty outsourcingu.'
+                },
+                najlepszaOpcja: 'B',
+                najlepszeWyjasnienie: 'Wdrożenie kompleksowej polityki bezpieczeństwa zapewnia spójne i efektywne zarządzanie ryzykiem w całej firmie.'
+            }
         ];
 
         // Funkcja wyświetlająca etap gry
